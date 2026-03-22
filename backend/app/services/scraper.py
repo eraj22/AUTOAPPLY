@@ -1,137 +1,265 @@
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
-import asyncio
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import logging
+import json
+from datetime import datetime
+from urllib.parse import urljoin
 
 logger = logging.getLogger(__name__)
 
 
 class JobScraper:
-    """Base scraper for job listings"""
+    """Multi-platform job scraper using Playwright for browser automation"""
     
     def __init__(self):
         self.browser = None
         self.playwright = None
     
     async def __aenter__(self):
+        """Async context manager entry - initialize browser"""
         self.playwright = await async_playwright().start()
         self.browser = await self.playwright.chromium.launch(headless=True)
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit - cleanup"""
         if self.browser:
             await self.browser.close()
         if self.playwright:
             await self.playwright.stop()
     
-    async def scrape_linkedin_jobs(self, search_query: str, location: str = "United States") -> List[Dict[str, Any]]:
+    async def scrape_github_jobs(self, search_query: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Scrape LinkedIn jobs (simplified - LinkedIn has CAPTCHA)
-        In production, use official API or data provider
+        Scrape GitHub Jobs board (https://jobs.github.com/)
+        
+        Args:
+            search_query: Optional search query (e.g., "python", "remote")
+        
+        Returns:
+            List of job dictionaries with title, company, location, url, source, scraped_at
         """
-        logger.info(f"Scraping LinkedIn jobs: {search_query} in {location}")
-        # TODO: Implement LinkedIn scraping with proper handling
-        # For now, return empty (real implementation would need proxy/API)
-        return []
-    
-    async def scrape_github_jobs(self) -> List[Dict[str, Any]]:
-        """Scrape GitHub Jobs board"""
         jobs = []
         page = None
         try:
             page = await self.browser.new_page()
-            await page.goto("https://jobs.github.com/")
+            url = "https://jobs.github.com/"
+            if search_query:
+                url += f"?search={search_query}"
             
-            # Wait for jobs to load
-            await page.wait_for_selector('[data-test-selector="job-result"]', timeout=5000)
+            logger.info(f"Scraping GitHub Jobs: {url}")
+            await page.goto(url, wait_until="networkidle")
             
-            # Get HTML
-            content = await page.content()
-            soup = BeautifulSoup(content, 'html.parser')
+            # Wait for job listings to appear
+            try:
+                await page.wait_for_selector("div.job-listing-result", timeout=10000)
+            except:
+                logger.warning("Timeout waiting for job listings on GitHub Jobs")
+                return jobs
             
-            # Parse jobs
-            job_elements = soup.select('[data-test-selector="job-result"]')
-            for job_elem in job_elements[:20]:  # Limit to 20 jobs
-                title = job_elem.select_one('[data-test-selector="job-result-item"]')
-                link = job_elem.select_one('a')
-                
-                if title and link:
-                    jobs.append({
-                        "title": title.text.strip(),
-                        "url": link.get('href', ''),
-                        "source": "github_jobs"
-                    })
-            
-            logger.info(f"Found {len(jobs)} jobs on GitHub Jobs")
-            
-        except Exception as e:
-            logger.error(f"Error scraping GitHub Jobs: {e}")
-        finally:
-            if page:
-                await page.close()
-        
-        return jobs
-    
-    async def scrape_greenhouse_jobs(self, company_name: str, careers_url: str) -> List[Dict[str, Any]]:
-        """
-        Scrape Greenhouse careers page for jobs
-        Greenhouse uses consistent HTML structure
-        """
-        jobs = []
-        page = None
-        
-        try:
-            page = await self.browser.new_page()
-            await page.goto(careers_url, wait_until="networkidle")
-            
-            content = await page.content()
-            soup = BeautifulSoup(content, 'html.parser')
-            
-            # Greenhouse typically uses this structure
-            job_elements = soup.select('div[class*="opening"]')
+            # Get all job elements
+            job_elements = await page.query_selector_all("div.job-listing-result")
+            logger.info(f"Found {len(job_elements)} job elements on GitHub Jobs")
             
             for job_elem in job_elements:
-                title_elem = job_elem.select_one('a')
-                if title_elem:
-                    job_url = title_elem.get('href', '')
-                    job_title = title_elem.text.strip()
+                try:
+                    # Extract title
+                    title_elem = await job_elem.query_selector("a.result-title")
+                    title_text = await title_elem.text_content() if title_elem else "N/A"
                     
-                    jobs.append({
-                        "title": job_title,
-                        "url": job_url if job_url.startswith('http') else f"https://greenhouse.io{job_url}",
-                        "company": company_name,
-                        "source": "greenhouse"
-                    })
+                    # Extract company
+                    company_elem = await job_elem.query_selector("a.result-company")
+                    company_text = await company_elem.text_content() if company_elem else "N/A"
+                    
+                    # Extract location
+                    location_elem = await job_elem.query_selector(".result-location")
+                    location_text = await location_elem.text_content() if location_elem else "Remote"
+                    
+                    # Extract job URL
+                    job_url = await title_elem.get_attribute("href") if title_elem else ""
+                    full_url = urljoin("https://jobs.github.com/", job_url)
+                    
+                    job = {
+                        "title": title_text.strip(),
+                        "company": company_text.strip(),
+                        "location": location_text.strip(),
+                        "url": full_url,
+                        "source": "github_jobs",
+                        "scraped_at": datetime.now().isoformat()
+                    }
+                    jobs.append(job)
+                    logger.debug(f"Scraped job: {job['title']} at {job['company']}")
+                
+                except Exception as e:
+                    logger.warning(f"Error parsing job element: {e}")
+                    continue
             
-            logger.info(f"Found {len(jobs)} jobs on Greenhouse for {company_name}")
+            logger.info(f"Successfully scraped {len(jobs)} jobs from GitHub Jobs")
             
         except Exception as e:
-            logger.error(f"Error scraping Greenhouse ({company_name}): {e}")
+            logger.error(f"Error scraping GitHub Jobs: {e}", exc_info=True)
         finally:
             if page:
                 await page.close()
         
         return jobs
     
-    async def scrape_all_sources(self, companies: List[Dict[str, str]]) -> List[Dict[str, Any]]:
-        """Scrape all job sources"""
-        all_jobs = []
+    async def scrape_greenhouse_jobs(self, careers_url: str) -> List[Dict[str, Any]]:
+        """
+        Scrape Greenhouse careers board
         
-        for company in companies:
-            if company.get('ats_platform') == 'greenhouse' or 'greenhouse' in company.get('careers_url', '').lower():
-                jobs = await self.scrape_greenhouse_jobs(company['name'], company['careers_url'])
-                all_jobs.extend(jobs)
+        Args:
+            careers_url: Company's Greenhouse URL (e.g., https://company.greenhouse.io/jobs)
         
-        # Add GitHub Jobs
-        github_jobs = await self.scrape_github_jobs()
-        all_jobs.extend(github_jobs)
+        Returns:
+            List of job dictionaries
+        """
+        jobs = []
+        page = None
         
-        return all_jobs
-
-
-# Async helper
-async def scrape_jobs_async(companies: List[Dict[str, str]]) -> List[Dict[str, Any]]:
-    """Helper to scrape all jobs from companies"""
-    async with JobScraper() as scraper:
-        return await scraper.scrape_all_sources(companies)
+        try:
+            page = await self.browser.new_page()
+            logger.info(f"Scraping Greenhouse: {careers_url}")
+            
+            await page.goto(careers_url, wait_until="networkidle")
+            
+            # Greenhouse uses various selectors - try main ones
+            selectors = [
+                "div[class*='job-opening']",
+                "div[class*='opening']",
+                "section[class*='opening']",
+                ".job-title",
+                "[data-test-selector='job-title']"
+            ]
+            
+            job_elements = []
+            for selector in selectors:
+                try:
+                    elements = await page.query_selector_all(selector)
+                    if elements:
+                        job_elements = elements
+                        logger.debug(f"Found {len(job_elements)} elements using selector: {selector}")
+                        break
+                except:
+                    continue
+            
+            if not job_elements:
+                logger.warning(f"No job elements found with any selector at {careers_url}")
+                return jobs
+            
+            for job_elem in job_elements[:50]:  # Limit to 50 jobs per page
+                try:
+                    # Try to extract title
+                    title_elem = await job_elem.query_selector("a")
+                    if not title_elem:
+                        title_elem = await job_elem.query_selector("[class*='title']")
+                    
+                    title = await title_elem.text_content() if title_elem else "N/A"
+                    job_url = await title_elem.get_attribute("href") if title_elem else ""
+                    
+                    # Make URL absolute
+                    if job_url and not job_url.startswith("http"):
+                        job_url = urljoin(careers_url, job_url)
+                    
+                    # Try to extract department/category
+                    dept_elem = await job_elem.query_selector("[class*='department']")
+                    department = await dept_elem.text_content() if dept_elem else ""
+                    
+                    # Try to extract location
+                    loc_elem = await job_elem.query_selector("[class*='location']")
+                    location = await loc_elem.text_content() if loc_elem else ""
+                    
+                    if title and title.strip() != "N/A":
+                        job = {
+                            "title": title.strip(),
+                            "department": department.strip() if department else "",
+                            "location": location.strip() if location else "",
+                            "url": job_url,
+                            "source": "greenhouse",
+                            "scraped_at": datetime.now().isoformat()
+                        }
+                        jobs.append(job)
+                        logger.debug(f"Scraped Greenhouse job: {job['title']}")
+                
+                except Exception as e:
+                    logger.debug(f"Error parsing Greenhouse job element: {e}")
+                    continue
+            
+            logger.info(f"Successfully scraped {len(jobs)} jobs from Greenhouse at {careers_url}")
+            
+        except Exception as e:
+            logger.error(f"Error scraping Greenhouse ({careers_url}): {e}", exc_info=True)
+        finally:
+            if page:
+                await page.close()
+        
+        return jobs
+    
+    async def scrape_linkedin_jobs(self, search_query: str, location: str = "") -> List[Dict[str, Any]]:
+        """
+        Placeholder for LinkedIn scraping
+        
+        Note: LinkedIn actively blocks web scrapers. They have:
+        - CAPTCHA challenges for automated detection
+        - Bot detection via browser fingerprinting
+        - Terms of Service that prohibit scraping
+        - Rate limiting and IP blocking
+        
+        Recommended alternatives:
+        1. Use LinkedIn API (requires approval)
+        2. Use LinkedIn recruiter platform
+        3. Use job aggregator APIs (Adzuna, GitHub Jobs API, etc.)
+        4. Use data providers that have legal agreements
+        
+        Args:
+            search_query: Job search query
+            location: Location filter
+        
+        Returns:
+            Empty list (not implemented)
+        """
+        logger.warning("LinkedIn scraping is blocked due to anti-bot measures. Use LinkedIn API instead.")
+        return []
+    
+    async def scrape_all_sources(self, 
+                                github_query: Optional[str] = None,
+                                greenhouse_urls: Optional[List[str]] = None) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Scrape all available job sources
+        
+        Args:
+            github_query: Optional search query for GitHub Jobs
+            greenhouse_urls: List of Greenhouse company URLs to scrape
+        
+        Returns:
+            Dictionary with results from each source
+        """
+        results = {
+            "github": [],
+            "greenhouse": [],
+            "linkedin": []
+        }
+        
+        # GitHub Jobs
+        if github_query:
+            try:
+                logger.info(f"Scraping GitHub Jobs for: {github_query}")
+                results["github"] = await self.scrape_github_jobs(github_query)
+            except Exception as e:
+                logger.error(f"GitHub scraping failed: {e}")
+                results["github"] = []
+        
+        # Greenhouse
+        if greenhouse_urls:
+            for url in greenhouse_urls:
+                try:
+                    logger.info(f"Scraping Greenhouse: {url}")
+                    gh_jobs = await self.scrape_greenhouse_jobs(url)
+                    results["greenhouse"].extend(gh_jobs)
+                except Exception as e:
+                    logger.error(f"Greenhouse scraping failed for {url}: {e}")
+        
+        # LinkedIn (not implemented)
+        results["linkedin"] = []
+        
+        return results

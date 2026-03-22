@@ -156,7 +156,7 @@ When you start the backend, all tables are created automatically:
 - user_settings
 - company_intel
 
-### 🚀 Next Steps (Phase 2: Scraper + LLM)
+###  Next Steps (Phase 2: Scraper + LLM)
 
 1. Implement proper LinkedIn scraper (with proxy handling)
 2. Test GitHub Jobs scraper
@@ -182,40 +182,4 @@ When you start the backend, all tables are created automatically:
 
 4. **API Documentation**:
    - Interactive Swagger UI at http://localhost:8000/docs
-   - ReDoc at http://localhost:8000/redoc
-
-### 📝 What to Review
-
-Before we commit to GitHub, please check:
-
-1. ✅ Project structure looks good?
-2. ✅ Database schema matches your needs?
-3. ✅ API endpoints cover Phase 1 requirements?
-4. ✅ Environment variables complete?
-5. ✅ Docker Compose setup correct?
-
-### ⚡ Quick Troubleshooting
-
-**Docker containers won't start:**
-```bash
-docker-compose logs -f
-```
-
-**Database connection error:**
-- Wait 30 seconds for Postgres to be ready
-- Check DATABASE_URL in .env matches compose file
-
-**Ollama not found:**
-```bash
-docker pull ollama/ollama
-docker-compose up -d ollama
-docker exec autoapply-ollama ollama pull mistral
-```
-
-**Frontend can't reach API:**
-- Check both services are running: `docker ps`
-- Verify API_URL in frontend/vite.config.js
-
----
-
-**Status**: Ready for Phase 2. Awaiting your approval before GitHub commit.
+   - ReDoc at http://localhost:8000/redo
