@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: autoapply-postgres
+    environment:
+      POSTGRES_USER: autoapply
+      POSTGRES_PASSWORD: autoapply_dev_password
+      POSTGRES_DB: autoapply_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoapply"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoapply-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: autoapply-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoapply-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: autoapply-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    networks:
+      - autoapply-network
+
+  backend:
+    build: ./backend
+    container_name: autoapply-backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://autoapply:autoapply_dev_password@postgres:5432/autoapply_db
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_URL: http://ollama:11434
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: noreply@autoapply.dev
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      APP_BASE_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - autoapply-network
+
+  frontend:
+    build: ./frontend
+    container_name: autoapply-frontend
+    command: npm run dev
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - autoapply-network
+
+volumes:
+  postgres_data:
+  ollama_data:
+
+networks:
+  autoapply-network:
+    driver: bridge
