@@ -39,8 +39,11 @@ class Job(Base):
     title = Column(String(255), nullable=False)
     url = Column(String(500), nullable=False, unique=True)
     raw_jd = Column(Text, nullable=True)
-    parsed_jd = Column(JSONB, nullable=True)  # {title, skills, seniority, keywords, etc}
-    fit_score = Column(Integer, nullable=True)  # 0-100
+    parsed_jd = Column(JSONB, nullable=True)  # Structured job data from AI parser
+    parser_version = Column(String(50), nullable=True)  # Parser version used
+    parsed_at = Column(DateTime, nullable=True)  # When job was parsed
+    match_score = Column(Integer, nullable=True)  # 0-100 match to user resume
+    fit_score = Column(Integer, nullable=True)  # 0-100 overall fit
     status = Column(String(50), default=JobStatus.NEW.value, nullable=False)
     found_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     approval_token = Column(String(500), nullable=True)
