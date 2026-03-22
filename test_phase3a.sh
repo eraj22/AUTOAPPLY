@@ -163,12 +163,9 @@ if echo "$MATCHES_RESPONSE" | grep -q "match_score"; then
     echo -e "${BOLD}${GREEN}🏆 TOP 3 MATCHES:${NC}\n"
     
     # Simple pretty printing for top 3
-    COUNT=1
-    echo "$MATCHES_RESPONSE" | jq -r '.matches[0:3] | .[] | 
-    "\n[' + (index . + 1 | tostring) + "️⃣] \(.job_title) @ \(.company_name)\n" +
-    "Match Score: \(.match_score)%\n" +
-    "Skills Match: \(.skill_match)%\n" +
-    "Seniority Match: \(.seniority_match)%"' 2>/dev/null || {
+    echo "$MATCHES_RESPONSE" | jq -r '.matches[0:3] | to_entries | .[] | 
+    "\n[" + ((.key + 1 | tostring) + "️⃣] " + .value.job_title + " @ " + (.value.company_name // "Unknown") + "\n" + 
+    "Match Score: " + (.value.match_score | tostring) + "%")' 2>/dev/null || {
         echo "$MATCHES_RESPONSE" | jq '.matches[0:3]' 2>/dev/null
     }
     

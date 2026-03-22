@@ -8,9 +8,10 @@ import json
 import httpx
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
-from app.config import settings
+from app.config import get_settings
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 class UserPreferences(BaseModel):
@@ -107,7 +108,9 @@ class ParsedResumeData(BaseModel):
 class ResumeParser:
     """Parse resume text using Ollama LLM"""
     
-    def __init__(self, ollama_url: str = settings.OLLAMA_API_URL, model: str = "llama2"):
+    def __init__(self, ollama_url: Optional[str] = None, model: str = "llama2"):
+        if ollama_url is None:
+            ollama_url = settings.ollama_api_url
         self.ollama_url = ollama_url
         self.model = model
         self.timeout = 60.0
