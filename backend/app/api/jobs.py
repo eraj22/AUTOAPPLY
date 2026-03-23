@@ -35,15 +35,6 @@ async def list_jobs(
     return query.all()
 
 
-@router.get("/{job_id}", response_model=JobResponse)
-async def get_job(job_id: uuid.UUID, db: Session = Depends(get_db)):
-    """Get job details"""
-    job = db.query(Job).filter(Job.id == job_id).first()
-    if not job:
-        raise ValueError(f"Job {job_id} not found")
-    return job
-
-
 @router.get("/stats/summary")
 async def get_job_stats(db: Session = Depends(get_db)):
     """Get job statistics"""
@@ -382,3 +373,13 @@ async def analyze_job_match(job_id: uuid.UUID, db: Session = Depends(get_db)):
         "parsed_job": parsed_job_data.dict(),
         "recommendation": match_result.recommendation
     }
+
+
+# IMPORTANT: Generic routes must come LAST to avoid shadowing specific ones like /matches, /stats, etc
+@router.get("/{job_id}", response_model=JobResponse)
+async def get_job(job_id: uuid.UUID, db: Session = Depends(get_db)):
+    """Get job details"""
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise ValueError(f"Job {job_id} not found")
+    return job
