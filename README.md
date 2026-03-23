@@ -192,4 +192,5 @@ This tool is designed to automate job applications. Users are responsible for en
 
 ---
 
-**Built with ❤️ by the AutoApply community**
+**Built with ❤️ by the eraz**
+
