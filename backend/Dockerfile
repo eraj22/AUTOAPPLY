@@ -6,6 +6,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
+    curl \
+    gnupg2 \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \
@@ -25,14 +27,18 @@ RUN apt-get update && apt-get install -y \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
     libuuid1 \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
-RUN playwright install chromium
+# Install Playwright browsers and dependencies
+RUN python -m playwright install --with-deps
+
+# Prepare cache directory for Playwright
+RUN mkdir -p /root/.cache/ms-playwright
 
 # Copy app
 COPY . .
