@@ -84,7 +84,7 @@ class ParsedJobData(BaseModel):
 class JobParser:
     """Parse job descriptions using Ollama LLM"""
     
-    def __init__(self, ollama_url: Optional[str] = None, model: str = "llama2"):
+    def __init__(self, ollama_url: Optional[str] = None, model: str = "tinyllama"):
         if ollama_url is None:
             ollama_url = settings.ollama_api_url
         self.ollama_url = ollama_url

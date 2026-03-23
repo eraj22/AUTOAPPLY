@@ -28,7 +28,7 @@ class JobMatchResult(BaseModel):
     job_id: Optional[str] = None
     job_title: str
     company_name: Optional[str] = None
-    match_score: int = Field(..., ge=0, le=100, description="Overall match 0-100")
+    match_score: int = Field(0, ge=0, le=100, description="Overall match 0-100")
     
     skill_match_score: int = Field(0, description="Skill match 0-100")
     seniority_match_score: int = Field(0, description="Seniority match 0-100")
