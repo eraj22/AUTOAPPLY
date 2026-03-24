@@ -22,6 +22,7 @@ export const companiesAPI = {
 export const jobsAPI = {
   list: () => api.get('/jobs'),
   get: (id) => api.get(`/jobs/${id}`),
+  getMatches: () => api.get('/jobs/matches'),
   approve: (token) => api.get(`/apply/approve?token=${token}`),
   skip: (token) => api.get(`/apply/skip?token=${token}`),
 }
