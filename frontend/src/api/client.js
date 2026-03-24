@@ -23,6 +23,8 @@ export const jobsAPI = {
   list: () => api.get('/jobs'),
   get: (id) => api.get(`/jobs/${id}`),
   getMatches: () => api.get('/jobs/matches'),
+  parseResume: (text) => api.post('/jobs/parse-resume-text', { resume_text: text }),
+  saveResume: (resumeData) => api.post('/jobs/resume', resumeData),
   approve: (token) => api.get(`/apply/approve?token=${token}`),
   skip: (token) => api.get(`/apply/skip?token=${token}`),
 }

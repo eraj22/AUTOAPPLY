@@ -257,6 +257,30 @@ async def parse_resume_endpoint(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Parsing failed: {str(e)}")
 
 
+@router.post("/parse-resume-text")
+async def parse_resume_text(request: dict):
+    """
+    Parse resume text directly (without needing it in database first)
+    Used for preview before saving
+    """
+    resume_text = request.get("resume_text", "").strip()
+    if not resume_text:
+        raise HTTPException(status_code=400, detail="resume_text is required")
+    
+    try:
+        parser = get_resume_parser()
+        parsed = await parser.parse_resume(resume_text)
+        
+        return {
+            "status": "success",
+            "parsed_data": parsed.dict(),
+            "confidence": parsed.confidence_score
+        }
+    except Exception as e:
+        logger.error(f"Error parsing resume text: {e}")
+        raise HTTPException(status_code=500, detail=f"Parsing failed: {str(e)}")
+
+
 @router.get("/matches")
 async def get_job_matches(db: Session = Depends(get_db)):
     """
