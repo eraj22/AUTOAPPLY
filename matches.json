@@ -1,0 +1,903 @@
+{
+    "total_jobs": 27,
+    "matches": [
+        {
+            "job_id": "12fc5f94-3df2-4fe9-8cfb-30c970132e83",
+            "job_title": "Backend Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "7abc58da-5024-4094-a02b-3becab96a4dc",
+            "job_title": "Lead Python Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "9e8daeef-70c3-4bab-9b4a-102746f8a64a",
+            "job_title": "DevOps Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "af6a1770-233d-4a43-abbc-01c5ca46d817",
+            "job_title": "Full Stack Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "ef832dd1-42a3-4327-8556-a9702b2e65c4",
+            "job_title": "Senior Python Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "f45dc021-9ec8-4678-a3ae-e72d06c0d5b0",
+            "job_title": "Junior Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "00dc4459-ac9e-4916-ad0b-bf01897574e1",
+            "job_title": "Solutions Architect",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "02ce508d-f817-47d0-a843-efaac6144b4e",
+            "job_title": "Data Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "0429f76c-2a0f-4271-a7f5-a27e9de6ef5f",
+            "job_title": "Senior iOS Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "117f0940-93e8-4b11-a3ec-73bb28e478e1",
+            "job_title": "Security Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "25cc4e1b-7751-434e-9f4e-d2c9fe3a1ec8",
+            "job_title": "Infrastructure Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "370cd970-de3a-47f2-b683-30f21c5fec54",
+            "job_title": "React Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "38ee7cc8-faf9-4815-83f0-fc2687b8789a",
+            "job_title": "Database Administrator",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "4f3edd60-a419-4c4b-83ed-cdbe3c8304b3",
+            "job_title": "Backend Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "648b525e-c60c-4874-be6d-02935a0ddcaf",
+            "job_title": "Senior Frontend Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "65ee2b71-24db-46a4-a8a4-9de5a4db5b88",
+            "job_title": "Junior Python Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "66ef3381-e0a6-446a-8119-62717a920175",
+            "job_title": "Machine Learning Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "6792a216-b0ab-4060-b1e5-c7d6c8ed0ae6",
+            "job_title": "Full Stack Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "6dbd9391-4e45-4ee6-8f61-57991de9520c",
+            "job_title": "Python Backend Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "70fd920c-bc32-4471-af28-e0993b165713",
+            "job_title": "Backend Architect",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "94c87508-71b7-477f-a819-2dbb3f611f0e",
+            "job_title": "Senior Data Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "9b5e94e6-c570-4b15-95d0-9f8ff8f0959d",
+            "job_title": "Android Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "9ce38640-3cd7-4de7-b7b3-e83c4a317312",
+            "job_title": "SRE Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "c346584a-24b3-40cb-a644-5847d3abb38d",
+            "job_title": "DevOps Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "da3e2c03-36f3-4f9a-8df1-09c448e1f777",
+            "job_title": "Entry Level Backend Intern",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "e4929e94-8c79-4e13-9305-d75ac94465ec",
+            "job_title": "Full Stack Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "f668bb0d-3fb8-4adb-aa4a-4d77cd02d54f",
+            "job_title": "Senior Backend Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        }
+    ],
+    "top_matches": [
+        {
+            "job_id": "12fc5f94-3df2-4fe9-8cfb-30c970132e83",
+            "job_title": "Backend Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "7abc58da-5024-4094-a02b-3becab96a4dc",
+            "job_title": "Lead Python Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "9e8daeef-70c3-4bab-9b4a-102746f8a64a",
+            "job_title": "DevOps Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "af6a1770-233d-4a43-abbc-01c5ca46d817",
+            "job_title": "Full Stack Engineer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        },
+        {
+            "job_id": "ef832dd1-42a3-4327-8556-a9702b2e65c4",
+            "job_title": "Senior Python Developer",
+            "company_name": null,
+            "match_score": 86,
+            "skill_match_score": 100,
+            "seniority_match_score": 100,
+            "salary_match_score": 75,
+            "remote_match_score": 50,
+            "positive_matches": [
+                "\u2713 Seniority level matches (mid)"
+            ],
+            "concerns": [
+                "\u26a0 Job is onsite, prefer hybrid"
+            ],
+            "missing_skills": [],
+            "skill_gaps": [],
+            "salary_gap": 0,
+            "reason_breakdown": [
+                {
+                    "category": "seniority",
+                    "match_type": "positive",
+                    "message": "Perfect seniority match: mid",
+                    "weight": 0.2
+                }
+            ],
+            "recommendation": "\ud83c\udfaf Excellent match! Highly recommended to apply"
+        }
+    ]
+}

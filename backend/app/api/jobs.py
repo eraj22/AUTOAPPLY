@@ -35,6 +35,364 @@ async def list_jobs(
     return query.all()
 
 
+@router.post("/seed")
+async def seed_diverse_jobs(db: Session = Depends(get_db)):
+    """
+    Seed database with 20+ diverse test jobs for demonstration
+    Useful for showing variety in job matching
+    """
+    # Get or create TechCorp company
+    company = db.query(Company).filter(Company.name == "TechCorp Industries").first()
+    if not company:
+        company = Company(
+            name="TechCorp Industries",
+            careers_url="https://careers.techcorp.example.com",
+            description="Enterprise software company"
+        )
+        db.add(company)
+        db.flush()
+    
+    company_id = company.id
+    
+    # Diverse job listings with varied requirements
+    jobs_data = [
+        # Senior Backend positions (high match)
+        {
+            "title": "Senior Backend Engineer",
+            "url": "https://example.com/jobs/senior-backend-1",
+            "raw_jd": """Senior Backend Engineer - Remote
+Requirements:
+- 6+ years backend development
+- Python, FastAPI, Django expertise
+- PostgreSQL, Redis, Elasticsearch
+- DDD, microservices architecture
+- AWS/GCP expertise
+Salary: $160k-$200k
+Remote: 100%
+Experience: Senior"""
+        },
+        {
+            "title": "Backend Architect",
+            "url": "https://example.com/jobs/backend-architect",
+            "raw_jd": """Backend Architect - San Francisco (Hybrid)
+Requirements:
+- 8+ years backend development
+- Python, Go, Java experience
+- System design and architecture
+- Team leadership
+- Cloud infrastructure (AWS)
+Salary: $180k-$250k
+Remote: Hybrid
+Experience: Senior"""
+        },
+        
+        # Mid-level Backend (good match)
+        {
+            "title": "Backend Developer",
+            "url": "https://example.com/jobs/backend-mid-1",
+            "raw_jd": """Backend Developer - Remote
+Requirements:
+- 4+ years Python development
+- FastAPI or Django
+- PostgreSQL, MongoDB
+- REST APIs, microservices
+- Docker, Kubernetes
+Salary: $130k-$170k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        {
+            "title": "Python Backend Engineer",
+            "url": "https://example.com/jobs/python-backend",
+            "raw_jd": """Python Backend Engineer - Remote
+Requirements:
+- 3+ years Python
+- FastAPI, Flask, or Django
+- SQL/NoSQL databases
+- REST API development
+- Problem solving
+Salary: $110k-$150k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        
+        # Junior Developer (partial match)
+        {
+            "title": "Junior Python Developer",
+            "url": "https://example.com/jobs/junior-python",
+            "raw_jd": """Junior Python Developer - New York (Onsite)
+Requirements:
+- 1+ years Python experience
+- Flask or FastAPI exposure
+- Learning mindset
+- Team player
+- CS degree or bootcamp
+Salary: $70k-$100k
+Remote: Onsite
+Experience: Junior"""
+        },
+        {
+            "title": "Entry Level Backend Intern",
+            "url": "https://example.com/jobs/backend-intern",
+            "raw_jd": """Backend Intern - Los Angeles (Onsite)
+Requirements:
+- Python basics
+- Database concepts
+- Web development fundamentals
+- Currently in school or recent grad
+Salary: $25-30/hr
+Remote: Onsite
+Experience: Intern"""
+        },
+        
+        # Frontend positions (low match for backend engineer)
+        {
+            "title": "Senior Frontend Engineer",
+            "url": "https://example.com/jobs/senior-frontend",
+            "raw_jd": """Senior Frontend Engineer - Remote
+Requirements:
+- 6+ years React/Vue/Angular
+- TypeScript, testing
+- UI/UX principles
+- Performance optimization
+Salary: $150k-$200k
+Remote: 100%
+Tech Stack: React, TypeScript, TailwindCSS"""
+        },
+        {
+            "title": "React Developer",
+            "url": "https://example.com/jobs/react-dev",
+            "raw_jd": """React Developer - Berlin (Remote)
+Requirements:
+- 3+ years React
+- JavaScript/TypeScript
+- CSS, responsive design
+- State management
+Salary: €80k-€120k
+Remote: 100%
+Tech Stack: React, Redux, Webpack"""
+        },
+        
+        # DevOps/Infrastructure (partial match)
+        {
+            "title": "DevOps Engineer",
+            "url": "https://example.com/jobs/devops-senior",
+            "raw_jd": """Senior DevOps Engineer - Austin (Hybrid)
+Requirements:
+- 5+ years DevOps/SRE
+- Kubernetes, Docker
+- AWS/GCP/Azure
+- Terraform, IaC
+- CI/CD pipelines
+Salary: $140k-$190k
+Remote: Hybrid
+Experience: Senior"""
+        },
+        {
+            "title": "Infrastructure Engineer",
+            "url": "https://example.com/jobs/infra-engineer",
+            "raw_jd": """Infrastructure Engineer - Remote
+Requirements:
+- 4+ years infrastructure
+- Kubernetes, Docker
+- AWS or GCP
+- IaC (Terraform, CloudFormation)
+- Monitoring and logging
+Salary: $130k-$170k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        {
+            "title": "SRE Engineer",
+            "url": "https://example.com/jobs/sre",
+            "raw_jd": """Site Reliability Engineer - London (Remote)
+Requirements:
+- 3+ years SRE/DevOps
+- Linux, scripting (Python/Bash)
+- Monitoring (Prometheus, ELK)
+- On-call rotations
+Salary: £100k-£150k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        
+        # Full Stack positions
+        {
+            "title": "Full Stack Engineer",
+            "url": "https://example.com/jobs/fullstack-senior",
+            "raw_jd": """Senior Full Stack Engineer - Toronto (Hybrid)
+Requirements:
+- 6+ years full stack
+- Backend: Python, Node.js
+- Frontend: React, Vue, Angular
+- PostgreSQL, MongoDB
+- AWS, Docker
+Salary: CAD $150k-$200k
+Remote: Hybrid
+Experience: Senior"""
+        },
+        {
+            "title": "Full Stack Developer",
+            "url": "https://example.com/jobs/fullstack-mid",
+            "raw_jd": """Full Stack Developer - Singapore (Remote)
+Requirements:
+- 3+ years full stack
+- Python or Node.js backend
+- React/Vue frontend
+- PostgreSQL
+- Docker basics
+Salary: SGD $100k-$150k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        
+        # Data Engineering (partial match - Python focus)
+        {
+            "title": "Senior Data Engineer",
+            "url": "https://example.com/jobs/data-engineer-senior",
+            "raw_jd": """Senior Data Engineer - Remote
+Requirements:
+- 6+ years data engineering
+- Python, Scala, or Java
+- SQL, data warehousing
+- Spark, Hadoop, Kafka
+- AWS/GCP data services
+Salary: $150k-$210k
+Remote: 100%
+Experience: Senior"""
+        },
+        {
+            "title": "Data Engineer",
+            "url": "https://example.com/jobs/data-engineer",
+            "raw_jd": """Data Engineer - Amsterdam (Hybrid)
+Requirements:
+- 3+ years data engineering
+- Python, SQL
+- ETL/ELT pipelines
+- Apache Spark, Airflow
+- Data warehousing
+Salary: €90k-€130k
+Remote: Hybrid
+Experience: Mid-level"""
+        },
+        
+        # Mobile positions (low match)
+        {
+            "title": "Senior iOS Developer",
+            "url": "https://example.com/jobs/ios-senior",
+            "raw_jd": """Senior iOS Developer - Cupertino (Onsite)
+Requirements:
+- 6+ years iOS development
+- Swift, Objective-C
+- SwiftUI, Core Data
+- App Store deployment
+- Team leadership
+Salary: $170k-$240k
+Remote: Onsite
+Tech Stack: Swift, SwiftUI"""
+        },
+        {
+            "title": "Android Developer",
+            "url": "https://example.com/jobs/android",
+            "raw_jd": """Android Developer - São Paulo (Remote)
+Requirements:
+- 4+ years Android
+- Kotlin, Java
+- Material Design
+- Android Studio
+- Firebase
+Salary: R$150k-R$250k
+Remote: 100%
+Tech Stack: Kotlin, Android Studio"""
+        },
+        
+        # Niche technical roles
+        {
+            "title": "Machine Learning Engineer",
+            "url": "https://example.com/jobs/ml-engineer",
+            "raw_jd": """Machine Learning Engineer - Remote
+Requirements:
+- 4+ years ML/AI
+- Python, TensorFlow/PyTorch
+- Data science fundamentals
+- Recommendation systems or NLP
+- Cloud ML services
+Salary: $140k-$200k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        {
+            "title": "Security Engineer",
+            "url": "https://example.com/jobs/security",
+            "raw_jd": """Security Engineer - Remote
+Requirements:
+- 4+ years cybersecurity
+- Python, Go scripting
+- Network security, cryptography
+- Penetration testing
+- OWASP, CIS frameworks
+Salary: $130k-$180k
+Remote: 100%
+Experience: Mid-level"""
+        },
+        {
+            "title": "Database Administrator",
+            "url": "https://example.com/jobs/dba",
+            "raw_jd": """Senior Database Administrator - Chicago (Hybrid)
+Requirements:
+- 6+ years DBA experience
+- PostgreSQL, MySQL, Oracle
+- Query optimization
+- Backup and recovery
+- Performance tuning
+Salary: $120k-$160k
+Remote: Hybrid
+Experience: Senior"""
+        },
+        {
+            "title": "Solutions Architect",
+            "url": "https://example.com/jobs/solutions-architect",
+            "raw_jd": """Solutions Architect - Seattle (Hybrid)
+Requirements:
+- 7+ years system design
+- Python, Java, Go
+- Cloud platforms (AWS/Azure/GCP)
+- Enterprise architecture
+- Customer engagement
+Salary: $160k-$220k
+Remote: Hybrid
+Experience: Senior"""
+        },
+    ]
+    
+    # Insert jobs, avoiding duplicates
+    added_count = 0
+    
+    for job_data in jobs_data:
+        existing = db.query(Job).filter(Job.url == job_data["url"]).first()
+        if existing:
+            continue
+        
+        job = Job(
+            company_id=company_id,
+            title=job_data["title"],
+            url=job_data["url"],
+            raw_jd=job_data["raw_jd"],
+            status="new",
+            found_at=datetime.utcnow()
+        )
+        db.add(job)
+        added_count += 1
+    
+    db.commit()
+    
+    return {
+        "status": "success",
+        "message": f"Seeded {added_count} diverse jobs",
+        "total_jobs": db.query(Job).count()
+    }
+
+
 @router.get("/stats/summary")
 async def get_job_stats(db: Session = Depends(get_db)):
     """Get job statistics"""
