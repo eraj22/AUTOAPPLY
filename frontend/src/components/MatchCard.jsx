@@ -1,4 +1,28 @@
-export default function MatchCard({ match, compact = false }) {
+import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { jobsAPI } from '../api/client'
+
+export default function MatchCard({ match, compact = false, onApplySuccess }) {
+  const [isApplied, setIsApplied] = useState(false)
+  
+  const applyMutation = useMutation({
+    mutationFn: async (jobId) => {
+      const response = await jobsAPI.applyToJob(jobId)
+      return response.data
+    },
+    onSuccess: (data) => {
+      setIsApplied(true)
+      onApplySuccess?.()
+    },
+    onError: (error) => {
+      alert('Failed to apply: ' + (error.response?.data?.detail || error.message))
+    },
+  })
+
+  const handleApply = () => {
+    applyMutation.mutate(match.job_id)
+  }
+
   const getScoreColor = (score) => {
     if (score >= 80) return 'text-green-600 bg-green-50'
     if (score >= 60) return 'text-yellow-600 bg-yellow-50'
@@ -36,7 +60,18 @@ export default function MatchCard({ match, compact = false }) {
             Salary: {match.salary_match_score}%
           </span>
         </div>
-        <p className="text-sm text-gray-600 italic">{match.recommendation}</p>
+        <p className="text-sm text-gray-600 italic mb-3">{match.recommendation}</p>
+        <button
+          onClick={handleApply}
+          disabled={applyMutation.isPending || isApplied}
+          className={`w-full py-2 rounded text-sm font-semibold ${
+            isApplied
+              ? 'bg-green-100 text-green-700 cursor-default'
+              : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
+          }`}
+        >
+          {isApplied ? '✓ Applied' : applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply'}
+        </button>
       </div>
     )
   }
@@ -142,8 +177,20 @@ export default function MatchCard({ match, compact = false }) {
 
       {/* Action Button */}
       <div className="mt-4 flex gap-2">
-        <button className="flex-1 btn-primary">View Job</button>
-        <button className="btn-secondary">Skip</button>
+        {isApplied ? (
+          <button disabled className="flex-1 bg-green-100 text-green-700 py-2 rounded font-semibold cursor-default">
+            ✓ Applied
+          </button>
+        ) : (
+          <button
+            onClick={handleApply}
+            disabled={applyMutation.isPending}
+            className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply Now'}
+          </button>
+        )}
+        <button className="btn-secondary">💾 Save</button>
       </div>
     </div>
   )
