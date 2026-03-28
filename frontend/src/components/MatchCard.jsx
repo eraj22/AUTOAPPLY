@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { jobsAPI } from '../api/client'
+import CoverLetterPreview from './CoverLetterPreview'
+import ResumeOptimizer from './ResumeOptimizer'
 
 export default function MatchCard({ match, compact = false, onApplySuccess }) {
   const [isApplied, setIsApplied] = useState(false)
+  const [showCoverLetterModal, setShowCoverLetterModal] = useState(false)
+  const [showOptimizeModal, setShowOptimizeModal] = useState(false)
   
   const applyMutation = useMutation({
     mutationFn: async (jobId) => {
@@ -21,6 +25,12 @@ export default function MatchCard({ match, compact = false, onApplySuccess }) {
 
   const handleApply = () => {
     applyMutation.mutate(match.job_id)
+  }
+
+  const handleApplyWithLetter = (coverLetter) => {
+    // First apply, then close modal
+    handleApply()
+    setShowCoverLetterModal(false)
   }
 
   const getScoreColor = (score) => {
@@ -61,17 +71,59 @@ export default function MatchCard({ match, compact = false, onApplySuccess }) {
           </span>
         </div>
         <p className="text-sm text-gray-600 italic mb-3">{match.recommendation}</p>
-        <button
-          onClick={handleApply}
-          disabled={applyMutation.isPending || isApplied}
-          className={`w-full py-2 rounded text-sm font-semibold ${
-            isApplied
-              ? 'bg-green-100 text-green-700 cursor-default'
-              : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-          }`}
-        >
-          {isApplied ? '✓ Applied' : applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply'}
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          {isApplied ? (
+            <button disabled className="flex-1 min-w-[120px] bg-green-100 text-green-700 py-2 rounded text-sm font-semibold cursor-default">
+              ✓ Applied
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowOptimizeModal(true)}
+                disabled={applyMutation.isPending}
+                className="bg-purple-200 text-purple-700 hover:bg-purple-300 py-2 px-3 rounded text-sm font-semibold disabled:opacity-50 transition whitespace-nowrap"
+              >
+                🎯 Optimize
+              </button>
+              <button
+                onClick={() => setShowCoverLetterModal(true)}
+                disabled={applyMutation.isPending}
+                className="bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-3 rounded text-sm font-semibold disabled:opacity-50 transition whitespace-nowrap"
+              >
+                📝 Letter
+              </button>
+              <button
+                onClick={handleApply}
+                disabled={applyMutation.isPending}
+                className={`flex-1 py-2 rounded text-sm font-semibold ${
+                  applyMutation.isPending
+                    ? 'bg-gray-400 text-white'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply'}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Cover Letter Modal */}
+        {showCoverLetterModal && (
+          <CoverLetterPreview
+            match={match}
+            onClose={() => setShowCoverLetterModal(false)}
+            onApplyWithLetter={handleApplyWithLetter}
+          />
+        )}
+
+        {/* Resume Optimizer Modal */}
+        {showOptimizeModal && (
+          <ResumeOptimizer
+            match={match}
+            onClose={() => setShowOptimizeModal(false)}
+            onResumeUpdated={() => {}}
+          />
+        )}
       </div>
     )
   }
@@ -176,22 +228,56 @@ export default function MatchCard({ match, compact = false, onApplySuccess }) {
       </div>
 
       {/* Action Button */}
-      <div className="mt-4 flex gap-2">
+      <div className="mt-4 flex gap-2 flex-wrap">
         {isApplied ? (
-          <button disabled className="flex-1 bg-green-100 text-green-700 py-2 rounded font-semibold cursor-default">
+          <button disabled className="flex-1 min-w-[150px] bg-green-100 text-green-700 py-2 rounded font-semibold cursor-default">
             ✓ Applied
           </button>
         ) : (
-          <button
-            onClick={handleApply}
-            disabled={applyMutation.isPending}
-            className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply Now'}
-          </button>
+          <>
+            <button
+              onClick={() => setShowOptimizeModal(true)}
+              disabled={applyMutation.isPending}
+              className="flex-1 btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🎯 Optimize Resume
+            </button>
+            <button
+              onClick={() => setShowCoverLetterModal(true)}
+              disabled={applyMutation.isPending}
+              className="flex-1 btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              📝 Cover Letter
+            </button>
+            <button
+              onClick={handleApply}
+              disabled={applyMutation.isPending}
+              className="flex-1 btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {applyMutation.isPending ? '⏳ Applying...' : '🚀 Apply Now'}
+            </button>
+          </>
         )}
         <button className="btn-secondary">💾 Save</button>
       </div>
+
+      {/* Cover Letter Modal */}
+      {showCoverLetterModal && (
+        <CoverLetterPreview
+          match={match}
+          onClose={() => setShowCoverLetterModal(false)}
+          onApplyWithLetter={handleApplyWithLetter}
+        />
+      )}
+
+      {/* Resume Optimizer Modal */}
+      {showOptimizeModal && (
+        <ResumeOptimizer
+          match={match}
+          onClose={() => setShowOptimizeModal(false)}
+          onResumeUpdated={() => {}}
+        />
+      )}
     </div>
   )
 }

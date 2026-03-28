@@ -25,7 +25,10 @@ export const jobsAPI = {
   getMatches: () => api.get('/jobs/matches'),
   parseResume: (text) => api.post('/jobs/parse-resume-text', { resume_text: text }),
   saveResume: (resumeData) => api.post('/jobs/resume', resumeData),
+  updateResume: (skillsToAdd) => api.put('/jobs/resume', { skills_to_add: skillsToAdd }),
   applyToJob: (jobId) => api.post(`/applications/apply/${jobId}`),
+  generateCoverLetter: (jobId) => api.post(`/jobs/generate-cover-letter/${jobId}`),
+  analyzeResumeForOptimization: (jobId) => api.post(`/jobs/optimize-resume/${jobId}`),
   approve: (token) => api.get(`/apply/approve?token=${token}`),
   skip: (token) => api.get(`/apply/skip?token=${token}`),
 }
