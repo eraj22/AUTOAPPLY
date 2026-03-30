@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     
     # Email (Resend)
     resend_api_key: str = os.getenv("RESEND_API_KEY", "")
-    email_from: str = os.getenv("EMAIL_FROM", "noreply@autoapply.dev")
+    email_from: str = os.getenv("EMAIL_FROM", "onboarding@resend.dev")
     
     # Scraping
     scrape_interval_hours: int = int(os.getenv("SCRAPE_INTERVAL_HOURS", "6"))

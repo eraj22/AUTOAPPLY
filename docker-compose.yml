@@ -55,7 +55,7 @@ services:
       REDIS_URL: redis://redis:6379
       OLLAMA_API_URL: http://ollama:11434
       RESEND_API_KEY: ${RESEND_API_KEY}
-      EMAIL_FROM: noreply@autoapply.dev
+      EMAIL_FROM: ${EMAIL_FROM}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       APP_BASE_URL: http://localhost:3000
     depends_on:

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .company-name { font-size: 18px; color: #333; font-weight: bold; margin-bottom: 5px; }
+        .job-title { font-size: 16px; color: #666; margin-bottom: 20px; }
+        .fit-score { font-size: 32px; color: #667eea; font-weight: bold; margin: 20px 0 5px 0; }
+        .fit-label { font-size: 12px; color: #999; }
+        .match-summary { background: #f9f9f9; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0; font-size: 14px; color: #333; line-height: 1.6; }
+        .summary-title { font-weight: bold; margin-bottom: 8px; }
+        .buttons { margin: 30px 0; text-align: center; }
+        .btn { display: inline-block; padding: 14px 30px; margin: 0 10px 10px 0; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 16px; }
+        .btn-yes { background: #10b981; color: white; }
+        .btn-no { background: #ef4444; color: white; }
+        .btn:hover { opacity: 0.9; }
+        .links { text-align: center; margin: 20px 0; font-size: 13px; }
+        .links a { color: #667eea; text-decoration: none; }
+        .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Job Match Found!</h1>
+            <p>Review and decide if you want to apply</p>
+        </div>
+        
+        <div class="content">
+            <div class="company-name">{{ company_name }}</div>
+            <div class="job-title">{{ job_title }}</div>
+            
+            <div style="font-size: 14px; color: #666; margin-bottom: 20px;">
+                {% if job_location %}📍 {{ job_location }}{% endif %}
+                {% if job_salary %}<br>💰 {{ job_salary }}{% endif %}
+            </div>
+            
+            <div class="fit-score">{{ fit_score }}%</div>
+            <div class="fit-label">Match Score</div>
+            
+            <div class="match-summary">
+                <div class="summary-title">Why this role matches your profile:</div>
+                {{ match_summary }}
+            </div>
+            
+            <div class="buttons">
+                <a href="{{ approve_url }}" class="btn btn-yes">✓ YES — Apply Now</a>
+                <a href="{{ skip_url }}" class="btn btn-no">✗ No — Skip This</a>
+            </div>
+            
+            <div class="links">
+                <a href="{{ preview_resume_url }}">👁️ Preview tailored resume</a> | 
+                <a href="{{ pause_url }}">⏸️ Pause notifications for 24h</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>AutoApply — Your intelligent job application assistant</p>
+        </div>
+    </div>
+</body>
+</html>

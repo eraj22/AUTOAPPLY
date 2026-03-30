@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .summary-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .stat-box { background: #f9f9f9; padding: 15px; border-radius: 6px; text-align: center; border-top: 3px solid #7c3aed; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #7c3aed; }
+        .stat-label { font-size: 12px; color: #666; margin-top: 5px; }
+        .section { margin: 25px 0; }
+        .section-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #7c3aed; }
+        .activity-item { padding: 12px; margin: 8px 0; background: #f9f9f9; border-left: 4px solid #7c3aed; border-radius: 4px; }
+        .activity-icon { display: inline-block; width: 24px; margin-right: 10px; }
+        .activity-text { font-size: 14px; color: #333; line-height: 1.5; }
+        .empty-state { padding: 20px; text-align: center; color: #999; font-size: 14px; background: #f5f5f5; border-radius: 6px; }
+        .cta { text-align: center; margin: 30px 0; }
+        .btn { display: inline-block; padding: 14px 30px; background: #7c3aed; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; }
+        .btn:hover { opacity: 0.9; }
+        .tips { background: #ede9fe; border-left: 4px solid #7c3aed; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .tips h4 { margin: 0 0 8px 0; color: #6d28d9; font-size: 14px; }
+        .tips p { margin: 5px 0; font-size: 13px; color: #5b21b6; }
+        .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Your Daily Digest</h1>
+            <p>{{ digest_date }}</p>
+        </div>
+        
+        <div class="content">
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <div class="stat-number">{{ jobs_found }}</div>
+                    <div class="stat-label">New Jobs</div>
+                </div>
+                <div class="stat-box" style="border-top-color: #10b981;">
+                    <div class="stat-number" style="color: #10b981;">{{ applications_submitted }}</div>
+                    <div class="stat-label">Applied</div>
+                </div>
+                <div class="stat-box" style="border-top-color: #f59e0b;">
+                    <div class="stat-number" style="color: #f59e0b;">{{ pending_approval }}</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+            </div>
+            
+            {% if jobs_found > 0 %}
+            <div class="section">
+                <div class="section-title">🆕 New Jobs Found</div>
+                {% for job in new_jobs %}
+                <div class="activity-item">
+                    <div class="activity-text">
+                        <strong>{{ job.title }}</strong> at <strong>{{ job.company }}</strong>
+                        <br>{{ job.location }} • {{ job.fit_score }}% match
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if applications_submitted > 0 %}
+            <div class="section">
+                <div class="section-title">✓ Applications Submitted</div>
+                {% for app in applications %}
+                <div class="activity-item">
+                    <div class="activity-text">
+                        <strong>{{ app.title }}</strong> at <strong>{{ app.company }}</strong>
+                        <br><small>{{ app.submitted_at }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if pending_approval > 0 %}
+            <div class="section">
+                <div class="section-title">⏳ Awaiting Your Approval</div>
+                {% for pending in pending_jobs %}
+                <div class="activity-item">
+                    <div class="activity-text">
+                        <strong>{{ pending.title }}</strong> at <strong>{{ pending.company }}</strong>
+                        <br><a href="{{ pending.approval_link }}" style="color: #7c3aed; text-decoration: none;">▶ Review →</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="tips">
+                <h4>💡 Today's Tip:</h4>
+                <p>
+                    {% if applications_submitted > 0 %}
+                    Great progress today! Don't forget to check your email for responses. Most companies reply within 3-5 business days.
+                    {% elif jobs_found > 0 %}
+                    You have {{ applications_submitted + pending_approval }} opportunities waiting. Review and apply to the ones that interest you most!
+                    {% else %}
+                    No new opportunities today, but keep checking! Quality over quantity — we only show jobs that match your profile.
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="cta">
+                <a href="{{ dashboard_link }}" class="btn">📊 View Full Dashboard</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>AutoApply — Your intelligent job application assistant</p>
+            <p style="margin-top: 10px;">You're receiving this because daily digests are enabled. <a href="{{ unsubscribe_link }}" style="color: #666; text-decoration: none;">Manage preferences</a></p>
+        </div>
+    </div>
+</body>
+</html>

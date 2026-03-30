@@ -105,3 +105,29 @@ class CompanyIntel(Base):
     source = Column(String(100), nullable=True)  # reddit, glassdoor, linkedin, etc
     fetched_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class EmailType(str, enum.Enum):
+    APPROVAL_NEEDED = "approval_needed"  # Type 1: Approval required
+    AUTO_APPLIED = "auto_applied"  # Type 2: Auto-applied notification
+    APPLICATION_CONFIRMED = "application_confirmed"  # Type 3: After submission
+    MANUAL_REQUIRED = "manual_required"  # Type 4: Manual action needed
+    DAILY_DIGEST = "daily_digest"  # Type 5: Daily summary
+
+
+class EmailLog(Base):
+    __tablename__ = "email_logs"
+    
+    id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    to_email = Column(String(255), nullable=False, index=True)
+    email_type = Column(String(50), nullable=False)  # EmailType enum
+    job_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
+    subject = Column(String(255), nullable=False)
+    resend_id = Column(String(255), nullable=True)  # ID from Resend API
+    sent_at = Column(DateTime, nullable=True)
+    deliver_status = Column(String(50), nullable=True)  # delivered, bounced, complained, etc
+    opened_at = Column(DateTime, nullable=True)
+    clicked_at = Column(DateTime, nullable=True)
+    context = Column(JSONB, nullable=True)  # Any additional context
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

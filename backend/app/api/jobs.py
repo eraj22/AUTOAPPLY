@@ -1,18 +1,21 @@
 from fastapi import APIRouter, Depends, Query, BackgroundTasks, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.models import Job, Resume, Company 
+from app.models import Job, Resume, Company, JobStatus, Application
 from app.schemas import JobResponse, ResumeResponse, ResumeCreate
 from app.services.scraper import JobScraper
 from app.services.job_parser import get_job_parser, ParsedJobData
 from app.services.resume_parser import get_resume_parser, ParsedResumeData
 from app.services.job_matcher import get_job_matcher, JobMatchResult
 from app.services.cover_letter_generator import get_cover_letter_generator
+from app.services.email_service import send_approval_email, send_auto_applied_email, send_application_confirmed_email, send_manual_required_email, send_daily_digest_email
+from app.config import get_settings
 from typing import List, Optional
 import uuid
 import logging
 from datetime import datetime
 import json
+import jwt
 
 logger = logging.getLogger(__name__)
 
@@ -1066,6 +1069,342 @@ async def update_resume(request: dict, db: Session = Depends(get_db)):
         db.rollback()
         logger.error(f"Error updating resume: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to update resume: {str(e)}")
+
+
+@router.get("/approve")
+async def approve_job_application(token: str = Query(...), db: Session = Depends(get_db)):
+    """
+    Approve a job application via email link
+    Validates JWT token and marks job for application
+    
+    Args:
+        token: Signed JWT token containing job_id and action
+        
+    Returns:
+        Status message
+    """
+    settings = get_settings()
+    try:
+        # Decode JWT token
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        job_id = uuid.UUID(payload.get("job_id"))
+        action = payload.get("action")  # Should be "approve"
+        
+        if action != "approve":
+            raise HTTPException(status_code=400, detail="Invalid action in token")
+        
+        # Get job
+        job = db.query(Job).filter(Job.id == job_id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # Mark job for application
+        job.status = JobStatus.APPLYING.value
+        job.approval_token = None  # Clear used token
+        job.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(job)
+        
+        logger.info(f"Job {job_id} approved for application")
+        
+        # TODO: Queue application bot task (Celery) to submit application
+        
+        return {
+            "status": "approved",
+            "message": f"Application for {job.title} at {job.company_id} initiating",
+            "job_id": str(job.id)
+        }
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Approval link has expired")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=400, detail="Invalid approval link")
+    except Exception as e:
+        logger.error(f"Error approving job: {e}")
+        raise HTTPException(status_code=500, detail="Failed to approve application")
+
+
+@router.get("/skip")
+async def skip_job(token: str = Query(...), db: Session = Depends(get_db)):
+    """
+    Skip a job application via email link
+    Validates JWT token and marks job as skipped
+    
+    Args:
+        token: Signed JWT token containing job_id and action
+        
+    Returns:
+        Status message
+    """
+    settings = get_settings()
+    try:
+        # Decode JWT token
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        job_id = uuid.UUID(payload.get("job_id"))
+        action = payload.get("action")  # Should be "skip"
+        
+        if action != "skip":
+            raise HTTPException(status_code=400, detail="Invalid action in token")
+        
+        # Get job
+        job = db.query(Job).filter(Job.id == job_id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        
+        # Mark job as skipped
+        job.status = JobStatus.SKIPPED.value
+        job.approval_token = None  # Clear used token
+        job.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(job)
+        
+        logger.info(f"Job {job_id} skipped by user")
+        
+        return {
+            "status": "skipped",
+            "message": f"Job {job.title} at {job.company_id} skipped",
+            "job_id": str(job.id)
+        }
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Skip link has expired")
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(status_code=400, detail="Invalid skip link")
+    except Exception as e:
+        logger.error(f"Error skipping job: {e}")
+        raise HTTPException(status_code=500, detail="Failed to skip job")
+
+
+# ======================== TEST ENDPOINTS (Phase 4) ========================
+# These are temporary endpoints for testing email functionality
+# Remove in production or gatekeeper behind admin auth
+
+@router.post("/test-approval-email")
+async def test_send_approval_email(request: dict, db: Session = Depends(get_db)):
+    """
+    TEST ENDPOINT: Send a sample approval email
+    For testing email integration during development
+    """
+    try:
+        to_email = request.get("to_email")
+        job_id = request.get("job_id")
+        company_name = request.get("company_name", "Test Company")
+        job_title = request.get("job_title", "Test Job")
+        fit_score = request.get("fit_score", 85)
+        match_summary = request.get("match_summary", "Great match for your profile")
+        
+        # Generate approval and skip URLs with JWT tokens
+        settings = get_settings()
+        approve_token = jwt.encode(
+            {"job_id": str(job_id), "action": "approve"},
+            settings.jwt_secret_key,
+            algorithm=settings.jwt_algorithm
+        )
+        skip_token = jwt.encode(
+            {"job_id": str(job_id), "action": "skip"},
+            settings.jwt_secret_key,
+            algorithm=settings.jwt_algorithm
+        )
+        
+        approve_url = f"{settings.app_base_url}/approve?token={approve_token}"
+        skip_url = f"{settings.app_base_url}/skip?token={skip_token}"
+        preview_resume_url = f"{settings.app_base_url}/resume/preview"
+        pause_url = f"{settings.app_base_url}/pause-notifications"
+        
+        result = await send_approval_email(
+            to_email=to_email,
+            job_title=job_title,
+            company_name=company_name,
+            fit_score=fit_score,
+            match_summary=match_summary,
+            approval_url=approve_url,
+            skip_url=skip_url,
+            preview_resume_url=preview_resume_url,
+            pause_url=pause_url,
+            job_id=job_id,
+            db=db
+        )
+        
+        return {
+            "status": "sent" if result["success"] else "failed",
+            "message": f"Approval email {'sent to' if result['success'] else 'failed to send to'} {to_email}",
+            "resend_id": result.get("resend_id"),
+            "error": result.get("error")
+        }
+    except Exception as e:
+        logger.error(f"Error in test approval email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/test-auto-apply-email")
+async def test_send_auto_apply_email(request: dict, db: Session = Depends(get_db)):
+    """
+    TEST ENDPOINT: Send a sample auto-applied email
+    """
+    try:
+        to_email = request.get("to_email")
+        job_id = request.get("job_id")
+        company_name = request.get("company_name", "Test Company")
+        job_title = request.get("job_title", "Test Job")
+        fit_score = request.get("fit_score", 90)
+        
+        settings = get_settings()
+        resume_link = f"{settings.app_base_url}/resume"
+        dashboard_link = f"{settings.app_base_url}/dashboard"
+        withdraw_token = jwt.encode(
+            {"job_id": str(job_id), "action": "withdraw"},
+            settings.jwt_secret_key,
+            algorithm=settings.jwt_algorithm
+        )
+        withdraw_url = f"{settings.app_base_url}/withdraw?token={withdraw_token}"
+        
+        result = await send_auto_applied_email(
+            to_email=to_email,
+            job_title=job_title,
+            company_name=company_name,
+            fit_score=fit_score,
+            submitted_at=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+            resume_link=resume_link,
+            dashboard_link=dashboard_link,
+            withdraw_url=withdraw_url,
+            job_id=job_id,
+            db=db
+        )
+        
+        return {
+            "status": "sent" if result["success"] else "failed",
+            "message": f"Auto-applied email {'sent to' if result['success'] else 'failed to send to'} {to_email}",
+            "resend_id": result.get("resend_id"),
+            "error": result.get("error")
+        }
+    except Exception as e:
+        logger.error(f"Error in test auto-apply email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/test-confirmation-email")
+async def test_send_confirmation_email(request: dict, db: Session = Depends(get_db)):
+    """
+    TEST ENDPOINT: Send a sample application confirmed email
+    """
+    try:
+        to_email = request.get("to_email")
+        job_id = request.get("job_id")
+        company_name = request.get("company_name", "Test Company")
+        job_title = request.get("job_title", "Test Job")
+        fit_score = request.get("fit_score", 88)
+        avg_response_days = request.get("avg_response_days", 10)
+        
+        settings = get_settings()
+        resume_link = f"{settings.app_base_url}/resume"
+        dashboard_link = f"{settings.app_base_url}/dashboard"
+        
+        result = await send_application_confirmed_email(
+            to_email=to_email,
+            job_title=job_title,
+            company_name=company_name,
+            fit_score=fit_score,
+            avg_response_days=avg_response_days,
+            resume_link=resume_link,
+            dashboard_link=dashboard_link,
+            job_id=job_id,
+            db=db
+        )
+        
+        return {
+            "status": "sent" if result["success"] else "failed",
+            "message": f"Confirmation email {'sent to' if result['success'] else 'failed to send to'} {to_email}",
+            "resend_id": result.get("resend_id"),
+            "error": result.get("error")
+        }
+    except Exception as e:
+        logger.error(f"Error in test confirmation email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/test-manual-email")
+async def test_send_manual_email(request: dict, db: Session = Depends(get_db)):
+    """
+    TEST ENDPOINT: Send a sample manual action required email
+    """
+    try:
+        to_email = request.get("to_email")
+        job_id = request.get("job_id")
+        company_name = request.get("company_name", "Test Company")
+        job_title = request.get("job_title", "Test Job")
+        issue_description = request.get("issue_description", "Form submission required manual interaction")
+        
+        settings = get_settings()
+        job_url = f"https://example.com/jobs/test"
+        dashboard_link = f"{settings.app_base_url}/dashboard"
+        
+        result = await send_manual_required_email(
+            to_email=to_email,
+            job_title=job_title,
+            company_name=company_name,
+            issue_description=issue_description,
+            job_url=job_url,
+            dashboard_link=dashboard_link,
+            job_id=job_id,
+            db=db
+        )
+        
+        return {
+            "status": "sent" if result["success"] else "failed",
+            "message": f"Manual required email {'sent to' if result['success'] else 'failed to send to'} {to_email}",
+            "resend_id": result.get("resend_id"),
+            "error": result.get("error")
+        }
+    except Exception as e:
+        logger.error(f"Error in test manual email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/test-digest-email")
+async def test_send_digest_email(request: dict, db: Session = Depends(get_db)):
+    """
+    TEST ENDPOINT: Send a sample daily digest email
+    """
+    try:
+        to_email = request.get("to_email")
+        
+        settings = get_settings()
+        dashboard_link = f"{settings.app_base_url}/dashboard"
+        unsubscribe_link = f"{settings.app_base_url}/unsubscribe"
+        
+        result = await send_daily_digest_email(
+            to_email=to_email,
+            digest_date=datetime.utcnow().strftime("%B %d, %Y"),
+            jobs_found=5,
+            applications_submitted=2,
+            pending_approval=1,
+            new_jobs=[
+                {"title": "Senior Backend Engineer", "company": "TechCorp", "location": "Remote", "fit_score": 92},
+                {"title": "Full Stack Developer", "company": "StartupXYZ", "location": "San Francisco", "fit_score": 87},
+            ],
+            applications=[
+                {"title": "Backend Engineer", "company": "Google", "submitted_at": "Today at 2:30 PM"},
+            ],
+            pending_jobs=[
+                {"title": "DevOps Engineer", "company": "Meta", "approval_link": f"{settings.app_base_url}/approve"},
+            ],
+            dashboard_link=dashboard_link,
+            unsubscribe_link=unsubscribe_link,
+            db=db
+        )
+        
+        return {
+            "status": "sent" if result["success"] else "failed",
+            "message": f"Digest email {'sent to' if result['success'] else 'failed to send to'} {to_email}",
+            "resend_id": result.get("resend_id"),
+            "error": result.get("error")
+        }
+    except Exception as e:
+        logger.error(f"Error in test digest email: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ======================== END TEST ENDPOINTS ========================
 
 
 # IMPORTANT: Generic routes must come LAST to avoid shadowing specific ones like /matches, /stats, etc

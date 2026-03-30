@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px 20px; }
+        .company-name { font-size: 18px; color: #333; font-weight: bold; margin-bottom: 5px; }
+        .job-title { font-size: 16px; color: #666; margin-bottom: 20px; }
+        .confirmation { background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; }
+        .confirmation p { margin: 8px 0; font-size: 14px; color: #333; }
+        .details { background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 6px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid #eee; }
+        .detail-row:last-child { border-bottom: none; }
+        .links { margin: 20px 0; text-align: center; }
+        .btn { display: inline-block; padding: 12px 24px; margin: 5px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; }
+        .btn-primary { background: #10b981; color: white; }
+        .btn-secondary { background: #e5e7eb; color: #333; }
+        .btn:hover { opacity: 0.9; }
+        .footer { background: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Application Submitted!</h1>
+            <p>Your application has been sent</p>
+        </div>
+        
+        <div class="content">
+            <div class="company-name">{{ company_name }}</div>
+            <div class="job-title">{{ job_title }}</div>
+            
+            <div class="confirmation">
+                <p><strong>✓ Confirmed!</strong> Your application was submitted on {{ submitted_at }}.</p>
+            </div>
+            
+            <div class="details">
+                <div class="detail-row">
+                    <span>Match Score:</span>
+                    <strong style="color: #10b981;">{{ fit_score }}%</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Resume Used:</span>
+                    <span>Tailored for this role</span>
+                </div>
+                <div class="detail-row">
+                    <span>Submitted At:</span>
+                    <span>{{ submitted_at }}</span>
+                </div>
+            </div>
+            
+            <div class="links">
+                <a href="{{ resume_link }}" class="btn btn-primary">📄 View Submitted Resume</a>
+                <a href="{{ dashboard_link }}" class="btn btn-secondary">📊 View in Dashboard</a>
+            </div>
+            
+            <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong style="color: #92400e;">Next Steps:</strong>
+                <p style="margin: 8px 0 0 0; font-size: 14px; color: #78350f;">
+                    Most companies respond within 3-5 business days. Keep an eye on your inbox, and don't forget to follow up if you don't hear back within 2 weeks!
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ withdraw_url }}" style="color: #ef4444; text-decoration: none; font-size: 13px;">Remove this application</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>AutoApply — Your intelligent job application assistant</p>
+        </div>
+    </div>
+</body>
+</html>
