@@ -5,6 +5,7 @@ import CompanyList from './components/CompanyList'
 import Dashboard from './pages/Dashboard'
 import JobMatches from './pages/JobMatches'
 import ResumeManagement from './pages/ResumeManagement'
+import Settings from './pages/Settings'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -65,12 +66,7 @@ function App() {
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'resume' && <ResumeManagement />}
         {activeTab === 'matches' && <JobMatches />}
-        {activeTab === 'settings' && (
-          <div className="card">
-            <h2 className="text-xl font-bold mb-4">Settings</h2>
-            <p>Settings page coming soon...</p>
-          </div>
-        )}
+        {activeTab === 'settings' && <Settings />}
       </div>
     </div>
   )

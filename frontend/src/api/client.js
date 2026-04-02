@@ -48,7 +48,7 @@ export const applicationsAPI = {
 // Settings API
 export const settingsAPI = {
   get: () => api.get('/settings'),
-  update: (data) => api.put('/settings', data),
+  update: (data) => api.put(`/settings/${data.id}`, data),
 }
 
 export default api
