@@ -60,9 +60,10 @@ async def root():
 
 
 # Import and include routers
-from app.api import companies, jobs, applications, settings
+from app.api import companies, jobs, applications, applications_bot, settings
 
 app.include_router(companies.router)
 app.include_router(jobs.router)
 app.include_router(applications.router)
+app.include_router(applications_bot.router)
 app.include_router(settings.router)
