@@ -38,6 +38,9 @@ class Job(Base):
     company_id = Column(SQLUUID(as_uuid=True), nullable=False, index=True)
     title = Column(String(255), nullable=False)
     url = Column(String(500), nullable=False, unique=True)
+    source = Column(String(50), nullable=True, index=True)  # linkedin, indeed, glassdoor, github, greenhouse, etc
+    external_job_id = Column(String(255), nullable=True, index=True)  # ID from source platform
+    location = Column(String(255), nullable=True, index=True)  # Explicit location field
     raw_jd = Column(Text, nullable=True)
     parsed_jd = Column(JSONB, nullable=True)  # Structured job data from AI parser
     parser_version = Column(String(50), nullable=True)  # Parser version used
@@ -46,6 +49,7 @@ class Job(Base):
     fit_score = Column(Integer, nullable=True)  # 0-100 overall fit
     status = Column(String(50), default=JobStatus.NEW.value, nullable=False)
     found_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    scraped_at = Column(DateTime, nullable=True)  # When job was scraped
     approval_token = Column(String(500), nullable=True)
     token_expires_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)

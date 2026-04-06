@@ -3,6 +3,19 @@ ALTER TABLE jobs ADD COLUMN IF NOT EXISTS parser_version VARCHAR DEFAULT NULL;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS parsed_at TIMESTAMP DEFAULT NULL;
 ALTER TABLE jobs ADD COLUMN IF NOT EXISTS match_score INTEGER DEFAULT NULL;
 
+-- Phase 2: Job Scraper System
+-- Add scraping-related columns to jobs table
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT NULL;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS external_job_id VARCHAR(255) DEFAULT NULL;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS location VARCHAR(255) DEFAULT NULL;
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS scraped_at TIMESTAMP DEFAULT NULL;
+
+-- Create indexes for Phase 2 queries
+CREATE INDEX IF NOT EXISTS idx_jobs_source ON jobs(source);
+CREATE INDEX IF NOT EXISTS idx_jobs_external_id ON jobs(external_job_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_location ON jobs(location);
+CREATE INDEX IF NOT EXISTS idx_jobs_scraped_at ON jobs(scraped_at);
+
 -- Phase 4: Email Notifications System
 -- Create email_logs table to track all sent emails
 CREATE TABLE IF NOT EXISTS email_logs (

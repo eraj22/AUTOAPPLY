@@ -195,6 +195,176 @@ class JobScraper:
         
         return jobs
     
+    async def scrape_indeed_jobs(self, search_query: str, location: str = "USA") -> List[Dict[str, Any]]:
+        """
+        Scrape Indeed job listings
+        
+        Args:
+            search_query: Job search query (e.g., "python developer", "backend engineer")
+            location: Location filter (default: USA)
+        
+        Returns:
+            List of job dictionaries from Indeed
+        """
+        jobs = []
+        page = None
+        
+        try:
+            page = await self.browser.new_page()
+            url = f"https://www.indeed.com/jobs?q={search_query}&l={location}"
+            
+            logger.info(f"Scraping Indeed: {url}")
+            await page.goto(url, wait_until="domcontentloaded")
+            
+            # Wait a bit for JS to render
+            await page.wait_for_timeout(2000)
+            
+            # Get all job cards
+            job_elements = await page.query_selector_all("div.job_seen_beacon")
+            logger.info(f"Found {len(job_elements)} job elements on Indeed")
+            
+            for job_elem in job_elements[:100]:  # Limit to 100 jobs per page
+                try:
+                    # Extract job title
+                    title_elem = await job_elem.query_selector("h2.jobTitle span")
+                    title = await title_elem.text_content() if title_elem else "N/A"
+                    
+                    # Extract company name
+                    company_elem = await job_elem.query_selector("span.companyName")
+                    company = await company_elem.text_content() if company_elem else "N/A"
+                    
+                    # Extract location
+                    loc_elem = await job_elem.query_selector("div.companyLocation")
+                    location_text = await loc_elem.text_content() if loc_elem else "Unknown"
+                    
+                    # Extract job URL
+                    link_elem = await job_elem.query_selector("h2.jobTitle a")
+                    job_url = await link_elem.get_attribute("href") if link_elem else ""
+                    
+                    if job_url and not job_url.startswith("http"):
+                        job_url = f"https://www.indeed.com{job_url}"
+                    
+                    # Extract job ID from URL
+                    job_id = job_url.split("jk=")[-1].split("&")[0] if "jk=" in job_url else ""
+                    
+                    # Extract snippet/summary
+                    snippet_elem = await job_elem.query_selector("div.job-snippet")
+                    snippet = await snippet_elem.text_content() if snippet_elem else ""
+                    
+                    if title and title.strip() != "N/A":
+                        job = {
+                            "title": title.strip(),
+                            "company": company.strip(),
+                            "location": location_text.strip(),
+                            "url": job_url,
+                            "external_id": job_id,
+                            "source": "indeed",
+                            "description_snippet": snippet.strip() if snippet else "",
+                            "scraped_at": datetime.now().isoformat()
+                        }
+                        jobs.append(job)
+                        logger.debug(f"Scraped Indeed job: {job['title']} at {job['company']}")
+                
+                except Exception as e:
+                    logger.debug(f"Error parsing Indeed job element: {e}")
+                    continue
+            
+            logger.info(f"Successfully scraped {len(jobs)} jobs from Indeed")
+            
+        except Exception as e:
+            logger.error(f"Error scraping Indeed: {e}", exc_info=True)
+        finally:
+            if page:
+                await page.close()
+        
+        return jobs
+    
+    async def scrape_glassdoor_jobs(self, search_query: str, location: str = "United States") -> List[Dict[str, Any]]:
+        """
+        Scrape Glassdoor job listings
+        
+        Args:
+            search_query: Job search query
+            location: Location filter
+        
+        Returns:
+            List of job dictionaries from Glassdoor
+        """
+        jobs = []
+        page = None
+        
+        try:
+            page = await self.browser.new_page()
+            # Glassdoor requires query params for search
+            url = f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={search_query}&locT=C&locId=1"
+            
+            logger.info(f"Scraping Glassdoor: {url}")
+            await page.goto(url, wait_until="domcontentloaded")
+            
+            # Wait for content to load
+            await page.wait_for_timeout(2000)
+            
+            # Get all job cards - Glassdoor uses CSS module naming
+            job_elements = await page.query_selector_all("[data-test='jobs-search-results-item']")
+            logger.info(f"Found {len(job_elements)} job elements on Glassdoor")
+            
+            for job_elem in job_elements[:100]:  # Limit to 100 jobs
+                try:
+                    # Extract job title
+                    title_elem = await job_elem.query_selector("jobTitle")
+                    if not title_elem:
+                        title_elem = await job_elem.query_selector("[data-test='job-link']")
+                    title = await title_elem.text_content() if title_elem else "N/A"
+                    
+                    # Extract job URL and ID
+                    link_elem = await job_elem.query_selector("a")
+                    job_url = await link_elem.get_attribute("href") if link_elem else ""
+                    if job_url and not job_url.startswith("http"):
+                        job_url = f"https://www.glassdoor.com{job_url}"
+                    
+                    # Extract company name
+                    company_elem = await job_elem.query_selector("[data-test='employer-name']")
+                    company = await company_elem.text_content() if company_elem else "N/A"
+                    
+                    # Extract location
+                    loc_elem = await job_elem.query_selector("[data-test='job-location']")
+                    location_text = await loc_elem.text_content() if loc_elem else "Unknown"
+                    
+                    # Extract salary if available
+                    salary_elem = await job_elem.query_selector("[data-test='job-salary']")
+                    salary = await salary_elem.text_content() if salary_elem else ""
+                    
+                    if title and title.strip() != "N/A":
+                        # Extract job ID from URL if available
+                        job_id = job_url.split("jobListingId=")[-1].split("&")[0] if "jobListingId=" in job_url else ""
+                        
+                        job = {
+                            "title": title.strip(),
+                            "company": company.strip(),
+                            "location": location_text.strip(),
+                            "url": job_url,
+                            "external_id": job_id,
+                            "source": "glassdoor",
+                            "salary": salary.strip() if salary else "",
+                            "scraped_at": datetime.now().isoformat()
+                        }
+                        jobs.append(job)
+                        logger.debug(f"Scraped Glassdoor job: {job['title']} at {job['company']}")
+                
+                except Exception as e:
+                    logger.debug(f"Error parsing Glassdoor job element: {e}")
+                    continue
+            
+            logger.info(f"Successfully scraped {len(jobs)} jobs from Glassdoor")
+            
+        except Exception as e:
+            logger.error(f"Error scraping Glassdoor: {e}", exc_info=True)
+        finally:
+            if page:
+                await page.close()
+        
+        return jobs
+    
     async def scrape_linkedin_jobs(self, search_query: str, location: str = "") -> List[Dict[str, Any]]:
         """
         Placeholder for LinkedIn scraping
@@ -222,14 +392,22 @@ class JobScraper:
         return []
     
     async def scrape_all_sources(self, 
+                                search_query: str = "software engineer",
+                                location: str = "USA",
                                 github_query: Optional[str] = None,
-                                greenhouse_urls: Optional[List[str]] = None) -> Dict[str, List[Dict[str, Any]]]:
+                                greenhouse_urls: Optional[List[str]] = None,
+                                scrape_indeed: bool = True,
+                                scrape_glassdoor: bool = True) -> Dict[str, List[Dict[str, Any]]]:
         """
         Scrape all available job sources
         
         Args:
+            search_query: Default search query for job boards
+            location: Default location filter
             github_query: Optional search query for GitHub Jobs
             greenhouse_urls: List of Greenhouse company URLs to scrape
+            scrape_indeed: Whether to scrape Indeed
+            scrape_glassdoor: Whether to scrape Glassdoor
         
         Returns:
             Dictionary with results from each source
@@ -237,7 +415,13 @@ class JobScraper:
         results = {
             "github": [],
             "greenhouse": [],
-            "linkedin": []
+            "indeed": [],
+            "glassdoor": [],
+            "linkedin": [],
+            "stats": {
+                "total_scraped": 0,
+                "scrape_timestamp": datetime.now().isoformat()
+            }
         }
         
         # GitHub Jobs
@@ -245,6 +429,7 @@ class JobScraper:
             try:
                 logger.info(f"Scraping GitHub Jobs for: {github_query}")
                 results["github"] = await self.scrape_github_jobs(github_query)
+                results["stats"]["total_scraped"] += len(results["github"])
             except Exception as e:
                 logger.error(f"GitHub scraping failed: {e}")
                 results["github"] = []
@@ -256,10 +441,90 @@ class JobScraper:
                     logger.info(f"Scraping Greenhouse: {url}")
                     gh_jobs = await self.scrape_greenhouse_jobs(url)
                     results["greenhouse"].extend(gh_jobs)
+                    results["stats"]["total_scraped"] += len(gh_jobs)
                 except Exception as e:
                     logger.error(f"Greenhouse scraping failed for {url}: {e}")
         
-        # LinkedIn (not implemented)
+        # Indeed
+        if scrape_indeed:
+            try:
+                logger.info(f"Scraping Indeed for: {search_query} in {location}")
+                results["indeed"] = await self.scrape_indeed_jobs(search_query, location)
+                results["stats"]["total_scraped"] += len(results["indeed"])
+            except Exception as e:
+                logger.error(f"Indeed scraping failed: {e}")
+                results["indeed"] = []
+        
+        # Glassdoor
+        if scrape_glassdoor:
+            try:
+                logger.info(f"Scraping Glassdoor for: {search_query}")
+                results["glassdoor"] = await self.scrape_glassdoor_jobs(search_query, location)
+                results["stats"]["total_scraped"] += len(results["glassdoor"])
+            except Exception as e:
+                logger.error(f"Glassdoor scraping failed: {e}")
+                results["glassdoor"] = []
+        
+        # LinkedIn (not supported due to anti-bot measures)
         results["linkedin"] = []
         
         return results
+    
+    @staticmethod
+    def normalize_job_data(job_dict: Dict[str, Any], company_id: str) -> Dict[str, Any]:
+        """
+        Normalize job data from different sources into consistent format
+        
+        Args:
+            job_dict: Raw job data from scraper
+            company_id: Company UUID to associate with job
+        
+        Returns:
+            Normalized job dictionary for database insertion
+        """
+        return {
+            "company_id": company_id,
+            "title": job_dict.get("title", "Unknown Position").strip(),
+            "url": job_dict.get("url", ""),
+            "source": job_dict.get("source", "unknown"),
+            "external_job_id": job_dict.get("external_id", ""),
+            "location": job_dict.get("location", "Remote"),
+            "scraped_at": job_dict.get("scraped_at"),
+            "raw_jd": job_dict.get("description_snippet", ""),
+            "parsed_jd": {
+                "company_name": job_dict.get("company", ""),
+                "position": job_dict.get("title", ""),
+                "location": job_dict.get("location", ""),
+                "salary": job_dict.get("salary", ""),
+                "department": job_dict.get("department", ""),
+                "source": job_dict.get("source", ""),
+            }
+        }
+    
+    @staticmethod
+    def is_duplicate_job(job_url: str, existing_urls: List[str], existing_external_ids: Dict[str, str]) -> bool:
+        """
+        Check if a job is a duplicate based on URL and external IDs
+        
+        Args:
+            job_url: Job URL to check
+            existing_urls: List of URLs already in database
+            existing_external_ids: Dict mapping source to external_id of existing jobs
+        
+        Returns:
+            True if job appears to be a duplicate
+        """
+        # Check exact URL match
+        if job_url in existing_urls:
+            logger.debug(f"Duplicate found: URL match {job_url}")
+            return True
+        
+        # Check for similar URLs (same job, different tracking params)
+        base_url = job_url.split("?")[0].split("#")[0]
+        for existing_url in existing_urls:
+            existing_base = existing_url.split("?")[0].split("#")[0]
+            if base_url == existing_base and len(base_url) > 20:  # Avoid false positives on short URLs
+                logger.debug(f"Duplicate found: Base URL match {base_url}")
+                return True
+        
+        return False

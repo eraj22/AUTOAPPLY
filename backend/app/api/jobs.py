@@ -441,11 +441,11 @@ async def scrape_greenhouse_jobs(company_id: uuid.UUID, background_tasks: Backgr
         company_id: Company ID with Greenhouse setup
     
     Returns:
-        Status message with job count
+        Status message
     """
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company or not company.careers_url:
-        return {"error": "Company not found or has no careers URL"}
+        raise HTTPException(status_code=404, detail="Company not found or has no careers URL")
     
     background_tasks.add_task(run_greenhouse_scraper, company.careers_url, company_id, db)
     return {
@@ -456,35 +456,163 @@ async def scrape_greenhouse_jobs(company_id: uuid.UUID, background_tasks: Backgr
     }
 
 
+@router.post("/scrape/indeed")
+async def scrape_indeed_jobs_endpoint(
+    search_query: str = Query(..., description="Job search query (e.g., 'python developer')"),
+    location: str = Query("USA", description="Location filter"),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    db: Session = Depends(get_db)
+):
+    """
+    Trigger Indeed job scraping
+    
+    Args:
+        search_query: Job search query
+        location: Location filter (default: USA)
+    
+    Returns:
+        Status message with scrape task info
+    """
+    background_tasks.add_task(run_indeed_scraper, search_query, location, db)
+    return {
+        "status": "scraping",
+        "message": f"Started scraping Indeed jobs for: {search_query} in {location}",
+        "source": "indeed",
+        "search_query": search_query,
+        "location": location
+    }
+
+
+@router.post("/scrape/glassdoor")
+async def scrape_glassdoor_jobs_endpoint(
+    search_query: str = Query(..., description="Job search query (e.g., 'software engineer')"),
+    location: str = Query("United States", description="Location filter"),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    db: Session = Depends(get_db)
+):
+    """
+    Trigger Glassdoor job scraping
+    
+    Args:
+        search_query: Job search query
+        location: Location filter
+    
+    Returns:
+        Status message with scrape task info
+    """
+    background_tasks.add_task(run_glassdoor_scraper, search_query, location, db)
+    return {
+        "status": "scraping",
+        "message": f"Started scraping Glassdoor jobs for: {search_query}",
+        "source": "glassdoor",
+        "search_query": search_query,
+        "location": location
+    }
+
+
+@router.post("/scrape/all")
+async def scrape_all_sources_endpoint(
+    search_query: str = Query("software engineer", description="Default search query for job boards"),
+    location: str = Query("USA", description="Default location filter"),
+    scrape_indeed: bool = Query(True, description="Scrape Indeed"),
+    scrape_glassdoor: bool = Query(True, description="Scrape Glassdoor"),
+    scrape_github: bool = Query(False, description="Scrape GitHub Jobs"),
+    github_query: Optional[str] = Query(None, description="GitHub Jobs search query"),
+    background_tasks: BackgroundTasks = BackgroundTasks(),
+    db: Session = Depends(get_db)
+):
+    """
+    Trigger scraping from all available sources simultaneously
+    
+    Args:
+        search_query: Default search query for job boards
+        location: Default location filter
+        scrape_indeed: Enable Indeed scraping
+        scrape_glassdoor: Enable Glassdoor scraping
+        scrape_github: Enable GitHub Jobs scraping
+        github_query: Custom search query for GitHub Jobs
+    
+    Returns:
+        Status summary of all scraping tasks started
+    """
+    tasks_started = []
+    
+    if scrape_github and github_query:
+        background_tasks.add_task(run_github_scraper, github_query, db)
+        tasks_started.append(f"GitHub Jobs ({github_query})")
+    
+    if scrape_indeed:
+        background_tasks.add_task(run_indeed_scraper, search_query, location, db)
+        tasks_started.append(f"Indeed ({search_query}, {location})")
+    
+    if scrape_glassdoor:
+        background_tasks.add_task(run_glassdoor_scraper, search_query, location, db)
+        tasks_started.append(f"Glassdoor ({search_query})")
+    
+    return {
+        "status": "scraping_started",
+        "message": "Scraping initiated from all enabled sources",
+        "sources_started": tasks_started,
+        "total_sources": len(tasks_started),
+        "note": "Jobs are being scraped in the background. Check /jobs endpoint to see results."
+    }
+
+
+
 async def run_github_scraper(query: str, db: Session):
     """Background task: Scrape GitHub and save jobs"""
     try:
         async with JobScraper() as scraper:
             jobs = await scraper.scrape_github_jobs(query)
             
+            # Get existing URLs to check for duplicates
+            existing_urls = [job.url for job in db.query(Job.url).all()]
+            
             # Save to database
+            saved_count = 0
+            skipped_count = 0
+            
             for job_data in jobs:
-                # Check if job already exists (by URL)
-                existing = db.query(Job).filter(Job.source_url == job_data.get("url")).first()
-                if existing:
+                # Check for duplicates
+                if JobScraper.is_duplicate_job(job_data.get("url"), existing_urls, {}):
+                    skipped_count += 1
                     continue
                 
+                # Get or create company (use "GitHub" or extract from data)
+                company_name = job_data.get("company", "GitHub Jobs")
+                company = db.query(Company).filter(Company.name == company_name).first()
+                if not company:
+                    company = Company(
+                        name=company_name,
+                        careers_url="https://jobs.github.com",
+                        application_mode="global"
+                    )
+                    db.add(company)
+                    db.flush()
+                
+                # Normalize and create job
+                normalized = JobScraper.normalize_job_data(job_data, company.id)
+                
                 db_job = Job(
-                    title=job_data.get("title"),
-                    company=job_data.get("company"),
-                    location=job_data.get("location"),
-                    source_url=job_data.get("url"),
-                    source="github_jobs",
-                    status="new",
-                    scraped_at=datetime.now(),
-                    job_description=json.dumps(job_data)
+                    company_id=normalized["company_id"],
+                    title=normalized["title"],
+                    url=normalized["url"],
+                    source=normalized["source"],
+                    external_job_id=normalized["external_job_id"],
+                    location=normalized["location"],
+                    raw_jd=normalized["raw_jd"],
+                    parsed_jd=normalized["parsed_jd"],
+                    scraped_at=normalized["scraped_at"],
+                    status=JobStatus.NEW.value
                 )
                 db.add(db_job)
+                saved_count += 1
+                existing_urls.append(job_data.get("url"))
             
             db.commit()
-            logger.info(f"Saved {len(jobs)} jobs from GitHub")
+            logger.info(f"GitHub scraper: Saved {saved_count} jobs, skipped {skipped_count} duplicates")
     except Exception as e:
-        logger.error(f"GitHub scraper error: {e}")
+        logger.error(f"GitHub scraper error: {e}", exc_info=True)
 
 
 async def run_greenhouse_scraper(careers_url: str, company_id: uuid.UUID, db: Session):
@@ -493,30 +621,150 @@ async def run_greenhouse_scraper(careers_url: str, company_id: uuid.UUID, db: Se
         async with JobScraper() as scraper:
             jobs = await scraper.scrape_greenhouse_jobs(careers_url)
             
-            # Save to database
+            # Get existing URLs and external IDs to check for duplicates
+            existing_urls = [job.url for job in db.query(Job.url).all()]
+            existing_external_ids = {
+                job.external_job_id: job.id 
+                for job in db.query(Job.external_job_id).all() 
+                if job.external_job_id
+            }
+            
+            saved_count = 0
+            skipped_count = 0
+            
             for job_data in jobs:
-                # Check if job already exists (by job_id)
-                existing = db.query(Job).filter(Job.external_id == job_data.get("job_id")).first()
-                if existing:
+                if JobScraper.is_duplicate_job(job_data.get("url"), existing_urls, existing_external_ids):
+                    skipped_count += 1
                     continue
                 
+                normalized = JobScraper.normalize_job_data(job_data, company_id)
+                
                 db_job = Job(
-                    company_id=company_id,
-                    title=job_data.get("title"),
-                    location=job_data.get("location"),
-                    source_url=job_data.get("url"),
-                    source="greenhouse",
-                    status="new",
-                    external_id=job_data.get("job_id"),
-                    scraped_at=datetime.now(),
-                    job_description=json.dumps(job_data)
+                    company_id=normalized["company_id"],
+                    title=normalized["title"],
+                    url=normalized["url"],
+                    source=normalized["source"],
+                    external_job_id=normalized["external_job_id"],
+                    location=normalized["location"],
+                    raw_jd=normalized["raw_jd"],
+                    parsed_jd=normalized["parsed_jd"],
+                    scraped_at=normalized["scraped_at"],
+                    status=JobStatus.NEW.value
                 )
                 db.add(db_job)
+                saved_count += 1
+                existing_urls.append(job_data.get("url"))
             
             db.commit()
-            logger.info(f"Saved {len(jobs)} jobs from Greenhouse for company {company_id}")
+            logger.info(f"Greenhouse scraper: Saved {saved_count} jobs for company {company_id}, skipped {skipped_count} duplicates")
     except Exception as e:
-        logger.error(f"Greenhouse scraper error: {e}")
+        logger.error(f"Greenhouse scraper error: {e}", exc_info=True)
+
+
+async def run_indeed_scraper(search_query: str, location: str, db: Session):
+    """Background task: Scrape Indeed and save jobs"""
+    try:
+        async with JobScraper() as scraper:
+            jobs = await scraper.scrape_indeed_jobs(search_query, location)
+            
+            # Get existing URLs
+            existing_urls = [job.url for job in db.query(Job.url).all()]
+            
+            saved_count = 0
+            skipped_count = 0
+            
+            for job_data in jobs:
+                if JobScraper.is_duplicate_job(job_data.get("url"), existing_urls, {}):
+                    skipped_count += 1
+                    continue
+                
+                # Get or create company
+                company_name = job_data.get("company", "Unknown Company")
+                company = db.query(Company).filter(Company.name == company_name).first()
+                if not company:
+                    company = Company(
+                        name=company_name,
+                        careers_url="https://www.indeed.com",
+                        application_mode="global"
+                    )
+                    db.add(company)
+                    db.flush()
+                
+                normalized = JobScraper.normalize_job_data(job_data, company.id)
+                
+                db_job = Job(
+                    company_id=normalized["company_id"],
+                    title=normalized["title"],
+                    url=normalized["url"],
+                    source=normalized["source"],
+                    external_job_id=normalized["external_job_id"],
+                    location=normalized["location"],
+                    raw_jd=normalized["raw_jd"],
+                    parsed_jd=normalized["parsed_jd"],
+                    scraped_at=normalized["scraped_at"],
+                    status=JobStatus.NEW.value
+                )
+                db.add(db_job)
+                saved_count += 1
+                existing_urls.append(job_data.get("url"))
+            
+            db.commit()
+            logger.info(f"Indeed scraper: Saved {saved_count} jobs for '{search_query}' in {location}, skipped {skipped_count} duplicates")
+    except Exception as e:
+        logger.error(f"Indeed scraper error: {e}", exc_info=True)
+
+
+async def run_glassdoor_scraper(search_query: str, location: str, db: Session):
+    """Background task: Scrape Glassdoor and save jobs"""
+    try:
+        async with JobScraper() as scraper:
+            jobs = await scraper.scrape_glassdoor_jobs(search_query, location)
+            
+            # Get existing URLs
+            existing_urls = [job.url for job in db.query(Job.url).all()]
+            
+            saved_count = 0
+            skipped_count = 0
+            
+            for job_data in jobs:
+                if JobScraper.is_duplicate_job(job_data.get("url"), existing_urls, {}):
+                    skipped_count += 1
+                    continue
+                
+                # Get or create company
+                company_name = job_data.get("company", "Unknown Company")
+                company = db.query(Company).filter(Company.name == company_name).first()
+                if not company:
+                    company = Company(
+                        name=company_name,
+                        careers_url="https://www.glassdoor.com",
+                        application_mode="global"
+                    )
+                    db.add(company)
+                    db.flush()
+                
+                normalized = JobScraper.normalize_job_data(job_data, company.id)
+                
+                db_job = Job(
+                    company_id=normalized["company_id"],
+                    title=normalized["title"],
+                    url=normalized["url"],
+                    source=normalized["source"],
+                    external_job_id=normalized["external_job_id"],
+                    location=normalized["location"],
+                    raw_jd=normalized["raw_jd"],
+                    parsed_jd=normalized["parsed_jd"],
+                    scraped_at=normalized["scraped_at"],
+                    status=JobStatus.NEW.value
+                )
+                db.add(db_job)
+                saved_count += 1
+                existing_urls.append(job_data.get("url"))
+            
+            db.commit()
+            logger.info(f"Glassdoor scraper: Saved {saved_count} jobs for '{search_query}', skipped {skipped_count} duplicates")
+    except Exception as e:
+        logger.error(f"Glassdoor scraper error: {e}", exc_info=True)
 
 
 # Resume endpoints
