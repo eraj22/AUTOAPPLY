@@ -6,15 +6,29 @@ from app.database import Base
 import enum
 
 
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    name = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 class Company(Base):
     __tablename__ = "companies"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     name = Column(String(255), unique=True, nullable=False, index=True)
     careers_url = Column(String(500), nullable=False)
+    search_query = Column(String(255), nullable=True)  # Search query for scraping
     ats_platform = Column(String(100), nullable=True)  # greenhouse, lever, workday, ashby, etc
     ats_url = Column(String(500), nullable=True)
     application_mode = Column(String(50), nullable=False, default="global")  # global, always_ask, always_auto, paused
+    is_active = Column(Boolean, default=True, nullable=False)
     last_scraped_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -35,9 +49,11 @@ class Job(Base):
     __tablename__ = "jobs"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     company_id = Column(SQLUUID(as_uuid=True), nullable=False, index=True)
     title = Column(String(255), nullable=False)
     url = Column(String(500), nullable=False, unique=True)
+    external_url = Column(String(500), nullable=True)  # URL from job board
     source = Column(String(50), nullable=True, index=True)  # linkedin, indeed, glassdoor, github, greenhouse, etc
     external_job_id = Column(String(255), nullable=True, index=True)  # ID from source platform
     location = Column(String(255), nullable=True, index=True)  # Explicit location field
@@ -46,6 +62,7 @@ class Job(Base):
     parser_version = Column(String(50), nullable=True)  # Parser version used
     parsed_at = Column(DateTime, nullable=True)  # When job was parsed
     match_score = Column(Integer, nullable=True)  # 0-100 match to user resume
+    match_details = Column(JSONB, nullable=True)  # Detailed match breakdown
     fit_score = Column(Integer, nullable=True)  # 0-100 overall fit
     status = Column(String(50), default=JobStatus.NEW.value, nullable=False)
     found_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -60,7 +77,9 @@ class Application(Base):
     __tablename__ = "applications"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     job_id = Column(SQLUUID(as_uuid=True), nullable=False, index=True)
+    resume_id = Column(SQLUUID(as_uuid=True), nullable=True)
     resume_path = Column(String(500), nullable=True)
     cover_letter = Column(Text, nullable=True)
     submitted_at = Column(DateTime, nullable=True)
@@ -75,7 +94,9 @@ class Resume(Base):
     __tablename__ = "resumes"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     base_resume = Column(JSONB, nullable=False)  # {name, email, phone, skills, experience, etc}
+    parsed_resume = Column(JSONB, nullable=True)  # Parsed resume data
     resume_pdf_path = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -85,8 +106,10 @@ class UserSettings(Base):
     __tablename__ = "user_settings"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     notification_email = Column(String(255), nullable=False)
     global_mode = Column(String(50), default="approval", nullable=False)  # approval or auto_apply
+    workflow_mode = Column(String(50), default="approval_required", nullable=False)  # auto_apply, approval_required, digest
     fit_score_threshold = Column(Integer, default=65, nullable=False)
     auto_apply_threshold = Column(Integer, default=75, nullable=False)
     target_roles = Column(JSONB, nullable=True)  # ["Backend Engineer", "Full Stack", etc]
@@ -123,13 +146,14 @@ class EmailLog(Base):
     __tablename__ = "email_logs"
     
     id = Column(SQLUUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     to_email = Column(String(255), nullable=False, index=True)
     email_type = Column(String(50), nullable=False)  # EmailType enum
     job_id = Column(SQLUUID(as_uuid=True), nullable=True, index=True)
     subject = Column(String(255), nullable=False)
     resend_id = Column(String(255), nullable=True)  # ID from Resend API
     sent_at = Column(DateTime, nullable=True)
-    deliver_status = Column(String(50), nullable=True)  # delivered, bounced, complained, etc
+    delivery_status = Column(String(50), nullable=True)  # delivered, bounced, complained, etc
     opened_at = Column(DateTime, nullable=True)
     clicked_at = Column(DateTime, nullable=True)
     context = Column(JSONB, nullable=True)  # Any additional context

@@ -21,3 +21,4 @@ weasyprint>=68.0
 resend>=0.4
 ollama>=0.0.50
 python-multipart>=0.0.6
+apscheduler>=3.10
