@@ -465,5 +465,5 @@ This tool is designed to automate job applications. Users are responsible for en
 
 ---
 
-**Built with ❤️ by Sher Zaman | AutoApply v0.5.0**
+**Built with ❤️ by eraz**
 
